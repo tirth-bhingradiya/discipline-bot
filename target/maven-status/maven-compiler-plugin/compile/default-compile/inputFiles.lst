@@ -1,0 +1,13 @@
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\config\AppConfig.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\controller\DashboardController.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\controller\HabitController.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\DisciplineBotApplication.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\dto\DailySummaryDTO.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\model\Habit.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\model\HabitLog.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\repository\HabitLogRepository.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\repository\HabitRepository.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\service\GeminiAIService.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\service\HabitService.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\service\NotificationScheduler.java
+C:\Workspace\discipline-bot\src\main\java\com\disciplinebot\service\WhatsAppBotService.java

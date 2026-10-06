@@ -1,0 +1,16 @@
+com\disciplinebot\service\WhatsAppBotService.class
+com\disciplinebot\repository\HabitLogRepository.class
+com\disciplinebot\dto\DailySummaryDTO$HabitStatus$Builder.class
+com\disciplinebot\repository\HabitRepository.class
+com\disciplinebot\controller\DashboardController.class
+com\disciplinebot\dto\DailySummaryDTO$Builder.class
+com\disciplinebot\service\NotificationScheduler.class
+com\disciplinebot\config\AppConfig.class
+com\disciplinebot\controller\HabitController.class
+com\disciplinebot\DisciplineBotApplication.class
+com\disciplinebot\service\GeminiAIService.class
+com\disciplinebot\dto\DailySummaryDTO$HabitStatus.class
+com\disciplinebot\model\Habit.class
+com\disciplinebot\service\HabitService.class
+com\disciplinebot\dto\DailySummaryDTO.class
+com\disciplinebot\model\HabitLog.class

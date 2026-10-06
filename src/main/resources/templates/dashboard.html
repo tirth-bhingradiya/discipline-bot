@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DisciplineBot — Your AI Self-Management Coach</title>
+    <meta name="description" content="AI-powered personal discipline coach tracking your daily habits with strict accountability">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<!-- Animated background particles -->
+<div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- HEADER -->
+<!-- ═══════════════════════════════════════════ -->
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <div class="logo-icon">🤖</div>
+            <div class="logo-text">
+                <span class="logo-name">DisciplineBot</span>
+                <span class="logo-tagline">No Excuses. Just Execution.</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="live-time" id="liveTime"></div>
+            <a href="/api/send/summary" class="btn btn-ghost" id="sendSummaryBtn" onclick="return sendSummary(event)">📤 Send Summary</a>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- FLASH MESSAGES -->
+<!-- ═══════════════════════════════════════════ -->
+<div th:if="${successMessage}" class="toast toast-success" id="toast">
+    <span>✅</span> <span th:text="${successMessage}"></span>
+</div>
+<div th:if="${errorMessage}" class="toast toast-error" id="toast">
+    <span>❌</span> <span th:text="${errorMessage}"></span>
+</div>
+
+<main class="main">
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- HERO STATS BAR -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="hero-stats">
+        <div class="date-banner">
+            <span class="date-text" th:text="${today}">Today's Date</span>
+            <div class="pulse-dot"></div>
+            <span class="active-badge">ACTIVE</span>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card stat-completed">
+                <div class="stat-number" th:text="${completedCount}">0</div>
+                <div class="stat-label">COMPLETED</div>
+                <div class="stat-icon">✅</div>
+            </div>
+            <div class="stat-card stat-partial">
+                <div class="stat-number" th:text="${partialCount}">0</div>
+                <div class="stat-label">IN PROGRESS</div>
+                <div class="stat-icon">⚡</div>
+            </div>
+            <div class="stat-card stat-missed">
+                <div class="stat-number" th:text="${missedCount}">0</div>
+                <div class="stat-label">NOT DONE</div>
+                <div class="stat-icon">❌</div>
+            </div>
+            <div class="stat-card stat-grade">
+                <div class="stat-number grade-display" th:text="${grade}" th:classappend="'grade-' + ${grade}">S</div>
+                <div class="stat-label">TODAY'S GRADE</div>
+                <div class="stat-icon">🏆</div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-section">
+            <div class="progress-header">
+                <span>Daily Progress</span>
+                <span class="progress-pct" th:text="${completionPct} + '%'">0%</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" th:style="'width:' + ${completionPct} + '%'"
+                     th:classappend="${#strings.equals(grade,'S') or #strings.equals(grade,'A')} ? 'fill-success' : (${#strings.equals(grade,'F')} ? 'fill-danger' : 'fill-warning')">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- HABIT CARDS GRID -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="habits-section">
+        <h2 class="section-title">
+            <span>⚡</span> Your Daily Missions
+            <span class="section-subtitle">Click to mark complete</span>
+        </h2>
+
+        <div class="habits-grid">
+            <div th:each="status, iterStat : ${todayStatus}"
+                 class="habit-card"
+                 th:classappend="'habit-' + ${#strings.toLowerCase(status.status)}"
+                 th:id="'habit-card-' + ${iterStat.index}">
+
+                <!-- Status ribbon -->
+                <div class="habit-ribbon"
+                     th:classappend="${status.status == 'DONE'} ? 'ribbon-done' : (${status.status == 'PARTIAL'} ? 'ribbon-partial' : 'ribbon-missed')"
+                     th:text="${status.status}">
+                </div>
+
+                <div class="habit-card-inner">
+                    <!-- Emoji & name -->
+                    <div class="habit-header">
+                        <div class="habit-emoji" th:text="${status.emoji}">💧</div>
+                        <div class="habit-info">
+                            <div class="habit-name" th:text="${status.habitName}">Habit Name</div>
+                            <div class="habit-progress-text">
+                                <span th:text="${status.completionCount}">0</span>
+                                /
+                                <span th:text="${status.targetCount}">1</span>
+                                done today
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini progress bar -->
+                    <div class="habit-progress-bar">
+                        <div class="habit-progress-fill"
+                             th:style="${status.targetCount > 0} ? 'width:' + ${(status.completionCount * 100 / status.targetCount) > 100 ? 100 : (status.completionCount * 100 / status.targetCount)} + '%' : 'width:0%'">
+                        </div>
+                    </div>
+
+                    <!-- Streak + Action -->
+                    <div class="habit-footer">
+                        <div class="streak-badge" th:if="${status.streak > 0}">
+                            🔥 <span th:text="${status.streak}">0</span> day streak
+                        </div>
+                        <div class="streak-badge streak-zero" th:if="${status.streak == 0}">
+                            Start your streak!
+                        </div>
+
+                        <form th:action="@{/habit/done}" method="post" class="done-form">
+                            <input type="hidden" name="habitId" th:value="${habits[iterStat.index].id}"/>
+                            <button type="submit" class="btn-done"
+                                    th:classappend="${status.status == 'DONE'} ? 'btn-done-complete' : ''">
+                                <span th:if="${status.status == 'DONE'}">✅ Done!</span>
+                                <span th:if="${status.status != 'DONE'}">Mark Done ✓</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- QUICK ACTIONS -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="quick-actions">
+        <h2 class="section-title"><span>🎯</span> Quick Actions</h2>
+        <div class="actions-grid">
+            <button class="action-card" onclick="testWhatsApp()">
+                <span class="action-icon">📱</span>
+                <span class="action-label">Test WhatsApp</span>
+                <span class="action-desc">Send a test message</span>
+            </button>
+            <a href="/summary" class="action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-label">View Summary</span>
+                <span class="action-desc">Full day report</span>
+            </a>
+            <a href="/h2-console" target="_blank" class="action-card">
+                <span class="action-icon">🗃️</span>
+                <span class="action-label">Database</span>
+                <span class="action-desc">View H2 console</span>
+            </a>
+            <button class="action-card" onclick="sendSummaryNow()">
+                <span class="action-icon">📤</span>
+                <span class="action-label">Send Report</span>
+                <span class="action-desc">WhatsApp now</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SCHEDULE REFERENCE -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="schedule-section">
+        <h2 class="section-title"><span>🕐</span> Today's Schedule</h2>
+        <div class="schedule-timeline">
+            <div class="timeline-item">
+                <div class="time-badge">5:45 AM</div>
+                <div class="timeline-content">⚡ Morning Wake-Up Message</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">6:00 AM</div>
+                <div class="timeline-content">🙏 Morning Chanting</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">7:00 AM</div>
+                <div class="timeline-content">🧴 Morning Skin Care</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">8:00 AM</div>
+                <div class="timeline-content">💧 Water #1 + 💊 Hair Medicine</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">11:00 AM</div>
+                <div class="timeline-content">💧 Water #2</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">2:00 PM</div>
+                <div class="timeline-content">💧 Water #3</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">5:00 PM</div>
+                <div class="timeline-content">💧 Water #4</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">7:00 PM</div>
+                <div class="timeline-content">🙏 Evening Chanting</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">8:00 PM</div>
+                <div class="timeline-content">💧 Water #5 (Final)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="time-badge">9:00 PM</div>
+                <div class="timeline-content">🧴 Night Skin Care</div>
+            </div>
+            <div class="timeline-item timeline-highlight">
+                <div class="time-badge">9:30 PM</div>
+                <div class="timeline-content">📊 Daily Summary Report on WhatsApp</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div>🤖 DisciplineBot &copy; 2026 — Your AI Coach Never Sleeps</div>
+    <div class="footer-motto">No Excuses. Just Execution. Every Single Day.</div>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
